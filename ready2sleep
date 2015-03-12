@@ -1,0 +1,65 @@
+#!/bin/bash
+network()
+{
+	i=0
+	io=0
+	while read line #loop through interfaces
+	do
+		i=$((i + 1))
+		if [ "$i" -gt 2 ] #skip first two lines
+		then
+			arr=($line)
+			io=$(($io + ${arr[1]} + ${arr[9]})) #1 = receive, 9 = transmit
+		fi
+	done < /proc/net/dev
+	echo $io #in bytes
+}
+if [ -f /dev/shm/sleep ]
+then
+	source /dev/shm/sleep
+fi
+if [ -z "$c" ]; then c=0; fi
+if [ -z "$p" ]; then p=0; fi
+if [ -z "$n" ]; then n=0; fi
+if [ -z "$oldIO" ]; then oldIO=$(network); fi
+if [ -z "$x" ] || [ -z "$y" ]
+then
+	eval $(xdotool getmouselocation --shell)
+	x=$X
+	y=$Y
+fi
+
+if [ "$(awk 'BEGIN{i=0}
+{sum[i]=$2+$3+$4+$5; idle[i++]=$5}
+END {printf "%d\n", 100*( (sum[1]-sum[0]) - (idle[1]-idle[0]) ) / (sum[1]-sum[0])}
+' <( head -n 1 /proc/stat; sleep 0.5; head -n 1 /proc/stat))" -lt 5 ]
+then
+	c=$((c+1))
+else
+	c=0
+fi
+
+eval $(xdotool getmouselocation --shell)
+if [ $X -eq $x ] && [ $Y -eq $y ]
+then
+	p=$((p+1))
+else
+	p=0
+fi
+io=$(network)
+if [ $((io - oldIO)) -lt 6144000 ] #50*1024*120
+then
+	n=$((n+1))
+else
+	n=0
+fi
+
+if [ "$c" -ge "$1" ] && [ "$p" -ge "$2" ] && [ "$n" -ge "$3" ]
+then
+	c=0
+	p=0
+	n=0
+	systemctl suspend
+fi
+
+echo -en "c=$c\np=$p\nn=$n\nx=$X\ny=$Y\noldIO=$io" > /dev/shm/sleep
