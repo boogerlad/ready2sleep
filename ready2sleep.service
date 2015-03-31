@@ -1,5 +1,5 @@
 [Unit]
-Description=modprobed_db update
+Description=checks if computer is idle
 
 [Service]
 Type=oneshot

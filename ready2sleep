@@ -22,11 +22,8 @@ if [ -z "$c" ]; then c=0; fi
 if [ -z "$p" ]; then p=0; fi
 if [ -z "$n" ]; then n=0; fi
 if [ -z "$oldIO" ]; then oldIO=$(network); fi
-if [ -z "$x" ] || [ -z "$y" ]
-then
-	eval $(xdotool getmouselocation --shell)
-	x=$X
-	y=$Y
+if [ ! -f /dev/shm/ss.png ]; then
+    gm import -window root /dev/shm/ss.png
 fi
 
 if [ "$(awk 'BEGIN{i=0}
@@ -38,14 +35,25 @@ then
 else
 	c=0
 fi
+gm import -window root /dev/shm/ss2.png
+read -d '' same <<"EOF"
+Image Difference (MeanSquaredError):
+           Normalized    Absolute
+          ============  ==========
+     Red: 0.0000000000        0.0
+   Green: 0.0000000000        0.0
+    Blue: 0.0000000000        0.0
+   Total: 0.0000000000        0.0
 
-eval $(xdotool getmouselocation --shell)
-if [ $X -eq $x ] && [ $Y -eq $y ]
+EOF
+compar="$(gm compare -metric mse /dev/shm/ss.png /dev/shm/ss2.png)"
+if [ "$compar" == "$same" ]
 then
 	p=$((p+1))
 else
 	p=0
 fi
+mv /dev/shm/ss2.png /dev/shm/ss.png
 io=$(network)
 if [ $((io - oldIO)) -lt 6144000 ] #50*1024*120
 then
