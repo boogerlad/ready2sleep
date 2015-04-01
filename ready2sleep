@@ -23,7 +23,7 @@ if [ -z "$p" ]; then p=0; fi
 if [ -z "$n" ]; then n=0; fi
 if [ -z "$oldIO" ]; then oldIO=$(network); fi
 if [ ! -f /dev/shm/ss.png ]; then
-    gm import -window root /dev/shm/ss.png
+    gm -display :0 import -window root /dev/shm/ss.png
 fi
 
 if [ "$(awk 'BEGIN{i=0}
@@ -35,7 +35,7 @@ then
 else
 	c=0
 fi
-gm import -window root /dev/shm/ss2.png
+gm import -display :0 -window root /dev/shm/ss2.png
 read -d '' same <<"EOF"
 Image Difference (MeanSquaredError):
            Normalized    Absolute
@@ -70,4 +70,4 @@ then
 	systemctl suspend
 fi
 
-echo -en "c=$c\np=$p\nn=$n\nx=$X\ny=$Y\noldIO=$io" > /dev/shm/sleep
+echo -en "c=$c\np=$p\nn=$n\noldIO=$io" > /dev/shm/sleep

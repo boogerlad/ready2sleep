@@ -2,6 +2,7 @@
 Description=checks if computer is idle
 
 [Service]
+User=root
 Type=oneshot
 Nice=19
 IOSchedulingClass=2
